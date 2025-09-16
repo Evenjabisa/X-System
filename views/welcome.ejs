@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/dark-light.css" />
+    <link rel="stylesheet" href="/css/sidebars.css" />
+    <link rel="stylesheet" href="/css/mystyle.css" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="/bootstrap-icons/font/bootstrap-icons.min.css" />
+
+    <!-- Scripts -->
+    <script src="/js/color-modes.js"></script>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+
+        .cover-container {
+            max-width: 42em;
+        }
+
+        .btn-gradient {
+            border-radius: 8px;
+            padding: 0.6rem 1.4rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #0d6efd, #6610f2);
+            border: none;
+            color: white;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .btn-outline-light {
+            border-radius: 8px;
+            padding: 0.6rem 1.4rem;
+            font-weight: bold;
+        }
+
+        footer {
+            position: sticky;
+            bottom: 0;
+            padding: 10px;
+            text-align: center;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body class="d-flex text-center text-bg-dark">
+    <div class="cover-container d-flex w-100 p-3 mx-auto flex-column">
+        <!-- Include Header -->
+        <%- include('auth/header', { currentPage: "Welcome" }) %>
+
+        <main class="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+            <h1>Welcome to <span class="fw-bold">X-System 👋</span></h1>
+            <p class="lead mt-3">
+                To help you with storing and organizing the data created and collected
+                by an organization. The data management process aim to make sure the
+                data in corporate systems is accurate, available and accessible.
+            </p>
+            <div class="mt-4">
+                <a href="/home" class="btn btn-gradient me-2">Dashboard</a>
+                <a href="#" class="btn btn-outline-light">Contact Sales</a>
+            </div>
+        </main>
+
+        <footer>
+            Designed and developed by Adel Elgebecy © 2025
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

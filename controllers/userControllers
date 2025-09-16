@@ -1,0 +1,162 @@
+const AuthUser = require("../models/authUser");
+var moment = require("moment");
+var jwt = require("jsonwebtoken");
+
+// home
+const user_index_get = (req, res) => {
+  var decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET_KEY);
+
+  AuthUser.findOne({ _id: decoded.id })
+    .then((result) => {
+      res.render("index", { arr: result.customerInfo, moment: moment });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// add new nested object
+const user_post = async (req, res) => {
+  try {
+    const decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET_KEY);
+
+    await AuthUser.updateOne(
+      { _id: decoded.id },
+      {
+        $push: {
+          customerInfo: {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            phoneNumber: req.body.phoneNumber,
+            age: req.body.age,
+            country: req.body.country,
+            gender: req.body.gender,
+          },
+        },
+      }
+    );
+
+    res.redirect("/home");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+};
+
+// delete nested object
+const user_delete = (req, res) => {
+  AuthUser.updateOne(
+    { "customerInfo._id": req.params.id },
+    { $pull: { customerInfo: { _id: req.params.id } } }
+  )
+    .then((result) => {
+      res.redirect("/home");
+      console.log("Deleted nested object:", result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// view/:id
+const user_view_get = (req, res) => {
+  AuthUser.findOne({ "customerInfo._id": req.params.id })
+    .then((result) => {
+      const clickedObject = result.customerInfo.find(
+        (item) => item._id == req.params.id
+      );
+      res.render("user/view", { obj: clickedObject, moment: moment });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// edit/:id (get form)
+const user_edit_get = (req, res) => {
+  AuthUser.findOne({ "customerInfo._id": req.params.id })
+    .then((result) => {
+      const clickedObject = result.customerInfo.find(
+        (item) => item._id == req.params.id
+      );
+      res.render("user/edit", { obj: clickedObject, moment: moment });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// update nested object
+const user_put = (req, res) => {
+  AuthUser.updateOne(
+    { "customerInfo._id": req.params.id },
+    {
+      $set: {
+        "customerInfo.$.firstName": req.body.firstName,
+        "customerInfo.$.lastName": req.body.lastName,
+        "customerInfo.$.email": req.body.email,
+        "customerInfo.$.phoneNumber": req.body.phoneNumber,
+        "customerInfo.$.age": req.body.age,
+        "customerInfo.$.country": req.body.country,
+        "customerInfo.$.gender": req.body.gender,
+      },
+    }
+  )
+    .then(() => res.redirect("/home"))
+    .catch((err) => console.log(err));
+};
+
+
+// search
+const user_search_post = (req, res) => {
+  const searchText = (req.body.searchText || "").trim();
+
+  let decoded;
+  try {
+    decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET_KEY);
+  } catch (err) {
+    console.log("JWT Error:", err.message);
+    return res.redirect("/login");
+  }
+
+  AuthUser.findOne({ _id: decoded.id }, { customerInfo: 1 })
+    .then((result) => {
+      if (!result) {
+        return res.render("user/search", { arr: [], moment });
+      }
+
+      const searchRegex = new RegExp(searchText, "i");
+
+      const searchCustomers = result.customerInfo.filter(
+        (item) =>
+          searchRegex.test(item.firstName) ||
+          searchRegex.test(item.lastName) ||
+          searchRegex.test(item.email) ||
+          searchRegex.test(item.phoneNumber) || // ✅ عدلت هنا
+          searchRegex.test(item.country)
+      );
+
+      res.render("user/search", { arr: searchCustomers, moment });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.render("user/search", { arr: [], moment });
+    });
+};
+
+// render add page
+const user_add_get = (req, res) => {
+  res.render("user/add");
+};
+
+module.exports = {
+  user_index_get,
+  user_edit_get,
+  user_view_get,
+  user_search_post,
+  user_delete,
+  user_put,
+  user_add_get,
+  user_post,
+};

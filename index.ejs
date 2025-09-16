@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+  <script src="./js/color-modes.js"></script>
+  <link rel="stylesheet" href="./bootstrap-icons-1.10.5/font/bootstrap-icons.min.css" />
+  <link rel="shortcut icon" href="./img/ali.png" type="image/x-icon">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home page</title>
+
+  <link href="./css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/dark-light.css" />
+  <link href="./css/sidebars.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/myStyle.css" />
+</head>
+
+<body>
+  <%- include('./Components/dark-light.ejs') %>
+
+    <main class="d-flex flex-nowrap">
+      <%- include('./Components/sidebar.ejs', { currentPage: 'index' }) %>
+        <section class="w-100">
+          <%- include('./Components/navbar.ejs') %>
+
+            <% if (arr.length===0) { %>
+              <h1 class="text-center mt-5">Start to create your Customers...</h1>
+              <% } %>
+
+                <% if (arr.length> 0) { %>
+                  <div class="table-responsive mt-5 px-2">
+                    <table class="table table-striped table-bordered text-center align-middle" style="width: 99%">
+                      <thead class="table-dark">
+                        <tr>
+                          <th>#</th>
+                          <th>Full Name</th>
+                          <th>Phone Number</th>
+                          <th>Gender</th>
+                          <th>Country</th>
+                          <th>Age</th>
+                          <th>Created at</th>
+                          <th>Last updated</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% arr.forEach((item, index)=> { %>
+                          <tr>
+                            <td>
+                              <%= index + 1 %>
+                            </td>
+                            <td>
+                              <%= item.firstName %>
+                                <%= item.lastName %>
+                            </td>
+                            <td>
+                              <%= item.phoneNumber %>
+                            </td>
+                            <td>
+                              <%= item.gender %>
+                            </td>
+                            <td>
+                              <%= item.country %>
+                            </td>
+                            <td>
+                              <%= item.age %>
+                            </td>
+                            <td>
+                              <%= moment(item.createdAt).fromNow() %>
+                            </td>
+                            <td>
+                              <%= moment(item.updatedAt).fromNow() %>
+                            </td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                <a class="btn btn-primary btn-sm" href="./view/<%= item._id %>" data-bs-toggle="tooltip"
+                                  title="View details">
+                                  <i class="bi bi-eye"></i>
+                                </a>
+                                <a class="btn btn-secondary btn-sm" href="./edit/<%= item._id %>"
+                                  data-bs-toggle="tooltip" title="Edit user">
+                                  <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="/edit/<%= item._id %>?_method=DELETE" method="POST"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                  <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete user">
+                                    <i class="bi bi-trash"></i>
+                                  </button>
+                                </form>
+                              </div>
+                            </td>
+                          </tr>
+                          <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                  <% } %>
+        </section>
+    </main>
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/sidebars.js"></script>
+    <script src="./js/main.js"></script>
+
+    <script>
+      // Initialize tooltips
+      document.addEventListener("DOMContentLoaded", () => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+      });
+    </script>
+</body>
+
+</html>
