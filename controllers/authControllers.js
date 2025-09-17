@@ -58,67 +58,53 @@ const get_signup = (req, res) => {
 
 const post_signup = async (req, res) => {
   try {
+    // check validation (email & password)
     const objError = validationResult(req);
-    if (!objError.isEmpty()) {
-      return res.status(400).json({ errors: objError.array() });
+    if (objError.errors.length > 0) {
+      return res.json({ arrValidationError: objError.errors });
     }
 
+    // check if the email already exist
     const isCurrentEmail = await AuthUser.findOne({ email: req.body.email });
     if (isCurrentEmail) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res.json({ existEmail: "Email already exist" });
     }
 
-    // 🔒 Hash password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-    const newUser = await AuthUser.create({
-      ...req.body,
-      password: hashedPassword,
-    });
-
-    const token = createToken(newUser);
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 86400000,
-    });
-
+    // create new user and login
+    const newUser = await AuthUser.create(req.body);
+    var token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET_KEY);
+    res.cookie("jwt", token, { httpOnly: true, maxAge: 86400000 });
     res.json({ id: newUser._id });
   } catch (error) {
-    console.error("Signup Error:", error);
-    res.status(500).json({ error: "Server error" });
+    console.log(error);
   }
 };
 
 const post_login = async (req, res) => {
   try {
     const loginUser = await AuthUser.findOne({ email: req.body.email });
-    if (!loginUser) {
-      return res.status(400).json({ error: "Email not found, please signup" });
+
+    if (loginUser == null) {
+      res.json({ notFoundEmail: "Email not found, try to sign up" });
+    } else {
+      const match = await bcrypt.compare(req.body.password, loginUser.password);
+      if (match) {
+        var token = jwt.sign({ id: loginUser._id }, process.env.JWT_SECRET_KEY);
+        res.cookie("jwt", token, { httpOnly: true, maxAge: 86400000 });
+        res.json({ id: loginUser._id });
+      } else {
+        res.json({
+          passwordError: `incorrect password for  ${req.body.email}`,
+        });
+      }
     }
-
-    const match = await bcrypt.compare(req.body.password, loginUser.password);
-    if (!match) {
-      return res.status(400).json({ error: "Incorrect password" });
-    }
-
-    const token = createToken(loginUser);
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 86400000,
-    });
-
-    res.json({ id: loginUser._id });
-  } catch (err) {
-    console.error("Login Error:", err);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (error) {
+    console.log(error);
   }
 };
+
+
+// profile image update
 
 const profile_image_update = async (req, res) => {
   try {
